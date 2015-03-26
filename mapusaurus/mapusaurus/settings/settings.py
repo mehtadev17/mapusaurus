@@ -120,6 +120,11 @@ REST_FRAMEWORK = {
         'rest_framework.renderers.JSONRenderer',
     ],
 }
+PDFREACTOR = {
+    'HOST': 'localhost',
+    'PORT': 9423,
+    'KEY': '<license><licenseserialno>3815</licenseserialno><licensee><name>Consumer Financial Protection Bureau</name><address><street>1700 G ST NWSTE 6013-W</street><city>Washington DC</city><country>United States</country></address></licensee><product>PDFreactor</product><majorversion>7</majorversion><minorversion>0</minorversion><licensetype>CPU</licensetype><amount>8</amount><unit>CPU</unit><maintenanceexpirationdate>2016-02-25</maintenanceexpirationdate><expirationdate>2016-02-25</expirationdate><purchasedate>2015-03-26</purchasedate><outputformats><pdf/><image/></outputformats><advanced><conditions><condition>This license is for use on development systems only. It may not be used on staging or productive systems of any kind.</condition></conditions></advanced><signatureinformation><signdate>2015-03-26 16:16</signdate><signature>302d02142ec8a294410005767cb5e0da44c28a0cd9ab35c002150093d18474c9e449770ba73e04d6ed2f8fcc6e7bf2</signature><checksum>3583</checksum></signatureinformation></license>',
+}
 
 SOUTH_TESTS_MIGRATE = False
 

@@ -1,11 +1,15 @@
 from urllib import urlencode
-
+from mapping.PDFreactor import PDFreactor
 from django.shortcuts import render
 from django.db.models.query import QuerySet
+from django.http import HttpResponse
 from geo.models import Geo
 from hmda.models import LendingStats
 from hmda.management.commands.calculate_loan_stats import (calculate_median_loans)
 from respondents.models import Institution
+from django.conf import settings
+from django.template.loader import get_template
+import logging
 
 def map(request, template):
     """Display the map. If lender info is present, provide it to the
@@ -35,6 +39,39 @@ def map(request, template):
         else:
             context['scaled_median_loans'] = 0
     return render(request, template, context)
+
+def map_pdf(request):
+    logger = logging.getLogger("pdf")
+    html = map(request, 'print_map.html').content
+    institution_id = request.GET.get('lender')
+    metro = request.GET.get('metro')
+    file_name = 'HMDA-Census-Tract_2013_Lender%s_MSA%s.pdf' % (institution_id, metro)
+    resp = HttpResponse(content_type='application/pdf')
+    resp['Content-Disposition'] = 'attachment; filename="{}.pdf"'.format(file_name)
+    pdfReactor = PDFreactor(port=settings.PDFREACTOR['PORT'], host=settings.PDFREACTOR['HOST'])    
+    if settings.PDFREACTOR.get('KEY'):
+        pdfReactor.setLicenseKey(settings.PDFREACTOR['KEY'])
+
+    pdfReactor.setAddLinks(True)
+    pdfReactor.setJavaScriptMode(1)
+
+    pdf = pdfReactor.renderDocumentFromContent(html.encode('utf-8'))
+
+    error = pdfReactor.getError()
+
+    if error:
+        logger.error('PDF {} generation failed: {}'.format(file_name, error))
+    else:
+        logger.info('PDF {} generation complete.'.format(file_name))
+
+    logs = pdfReactor.getLog()
+    logger.debug(logs)
+
+    # insert pdf into response
+    resp.write(pdf)
+
+    return resp
+
 
 def make_download_url(lender, metro):
     """Create a link to CFPB's HMDA explorer, either linking to all of this
